@@ -5,9 +5,11 @@ import pandas as pd
 import emoji
 
 
-def get_filtered_data(selected_user, df, start_date, end_date):
-    if selected_user != "Overall":
-        df = df[df['user'] == selected_user]
+def get_filtered_data(selected_users, df, start_date, end_date):
+    ''' if selected_user != "Overall":
+        df = df[df['user'] == selected_user] '''
+    if "Overall" not in selected_users:
+        df = df[df['user'].isin(selected_users)]
 
     df = df[(df['only_date'] >= start_date) & (df['only_date'] <= end_date)]
     return df

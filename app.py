@@ -27,7 +27,7 @@ if uploaded_file is not None:
         user_list.sort()
         user_list.insert(0, "Overall")
 
-        selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
+        selected_users = st.sidebar.multiselect("Show analysis wrt", user_list, default=[user_list[0]])
         # sidebar dates
         min_date = df['only_date'].min()
         max_date = df['only_date'].max()
@@ -35,8 +35,8 @@ if uploaded_file is not None:
         end_date = st.sidebar.date_input("Select end date", value=max_date, min_value=min_date, max_value=max_date)
 
         if st.sidebar.button("Show Analysis"):
-            df = helper.get_filtered_data(selected_user, df, start_date, end_date)
-
+            df = helper.get_filtered_data(selected_users, df, start_date, end_date)
+            st.dataframe(df)
             # top-statistics
             num_messages, num_words, num_media_messages, num_links = helper.bring_stats(df)
             st.title("Top Statistics")
@@ -62,6 +62,7 @@ if uploaded_file is not None:
             ax.set_xlabel("Date")
             ax.set_ylabel("Number of Messages")
             plt.xticks(rotation='vertical')
+            ax.set_title("Number of messages sent each day")
             st.pyplot(fig)
 
             # month-timeline
@@ -71,6 +72,7 @@ if uploaded_file is not None:
             ax.plot(month_timeline['time'], month_timeline['num_messages'], color='green')
             ax.set_ylabel("Number of Messages")
             plt.xticks(rotation='vertical')
+            ax.set_title("Number of messages sent each month")
             st.pyplot(fig)
 
             # activity-map
@@ -79,12 +81,13 @@ if uploaded_file is not None:
             # week-activity
             with col1:
                 week_map = helper.get_week_map(df)
-                st.header("Week Map")
+                st.header("WeekDay Map")
                 fig, ax = plt.subplots()
                 ax.bar(week_map['day_name'], week_map['num_messages'])
                 ax.set_xlabel("Week Days")
                 ax.set_ylabel("Number of messages")
                 plt.xticks(rotation='vertical')
+                ax.set_title("Total Number of messages sent on each weekday")
                 st.pyplot(fig)
 
             # month-activity
@@ -96,6 +99,7 @@ if uploaded_file is not None:
                 ax.set_xlabel("Month")
                 ax.set_ylabel("Number of messages")
                 plt.xticks(rotation='vertical')
+                ax.set_title("Total Number of messages sent in a month")
                 st.pyplot(fig)
 
             # Activity heat map
@@ -105,7 +109,7 @@ if uploaded_file is not None:
             ax = sns.heatmap(heat_map, cmap='RdYlGn', cbar_kws={'label': 'Number of Messages'})
             st.pyplot(fig)
 
-            if selected_user == 'Overall':
+            if "Overall" in selected_users:
                 x, new_df = helper.most_busy_users(df)
                 fig, ax = plt.subplots()
 
@@ -115,6 +119,7 @@ if uploaded_file is not None:
                     ax.bar(x.index, x.values, color='red')
                     ax.set_ylabel("Number of messages")
                     plt.xticks(rotation='vertical')
+                    ax.set_title("Total Number of messages sent by top 5 users")
                     st.pyplot(fig)
                 with col2:
                     st.dataframe(new_df)
@@ -141,6 +146,7 @@ if uploaded_file is not None:
             ax.barh(most_common_df[0], most_common_df[1])
             ax.set_xlabel("Number of times used")
             plt.xticks(rotation='vertical')
+            ax.set_title("Most Common Words used")
             st.pyplot(fig)
 
             # Emoji Analysis
@@ -154,11 +160,12 @@ if uploaded_file is not None:
             with col2:
                 fig, ax = plt.subplots()
                 ax.pie(emoji_df[1].head(), labels=emoji_df[0].head(), autopct="%0.2f")
+                ax.set_title("Top 5 Emoji usage percentage")
                 st.pyplot(fig)
 
             # sentiment-analysis
-            # st.title("Sentiment Analysis")
-            st.markdown("<h1 style='text-align: center;'><u>Sentiment Analysis</u></h1>", unsafe_allow_html=True)
+            st.title("Sentiment Analysis")
+            # st.markdown("<h1 style='text-align: center;'><u>Sentiment Analysis</u></h1>", unsafe_allow_html=True)
 
             # daily-analysis
             st.title("Daily Analysis")
@@ -166,7 +173,14 @@ if uploaded_file is not None:
             fig, ax = plt.subplots()
             ax.plot(sentiments_daily_timeline['only_date'], sentiments_daily_timeline['sentiment'], color='black')
             plt.xticks(rotation='vertical')
-            ax.set_ylabel("Sentiment")
+            ax.set_ylabel("Sentiment Score")
+
+            ax.axhline(y=0.05, color='green', linestyle='--', label='Positive (> 0.05)')
+            ax.axhline(y=-0.05, color='red', linestyle='--', label='Negative (< -0.05)')
+            ax.axhline(y=0, color='blue', linestyle='--', label='Neutral (-0.05 to 0.05)')
+            ax.legend(loc='upper right')
+
+            ax.set_title("Average Sentiment score on each day")
             st.pyplot(fig)
 
             # month-analysis
@@ -175,7 +189,14 @@ if uploaded_file is not None:
             fig, ax = plt.subplots()
             ax.plot(sentiments_monthly_timeline['time'], sentiments_monthly_timeline['sentiment'])
             plt.xticks(rotation='vertical')
-            ax.set_ylabel("Sentiment")
+            ax.set_ylabel("Sentiment Score")
+
+            ax.axhline(y=0.05, color='green', linestyle='--', label='Positive (> 0.05)')
+            ax.axhline(y=-0.05, color='red', linestyle='--', label='Negative (< -0.05)')
+            ax.axhline(y=0, color='blue', linestyle='--', label='Neutral (-0.05 to 0.05)')
+            ax.legend(loc='upper right')
+
+            ax.set_title("Average Sentiment score each month")
             st.pyplot(fig)
 
             # activity-map
@@ -184,12 +205,27 @@ if uploaded_file is not None:
 
             # week-wise-sentiment-map
             with col1:
-                st.header("Week Map")
+                st.header("WeekDay Map")
                 sentiment_weekly_map = helper.get_sentiments_weekly_map(df)
                 fig, ax = plt.subplots()
-                ax.bar(sentiment_weekly_map['day_name'], sentiment_weekly_map['sentiment'], color='green')
+                bars = ax.bar(sentiment_weekly_map['day_name'], sentiment_weekly_map['sentiment'])
                 plt.xticks(rotation='vertical')
-                ax.set_ylabel("Sentiment")
+                ax.set_ylabel("Sentiment Score")
+
+                for bar in bars:
+                    yval = bar.get_height()
+                    if yval > 0.05:
+                        label = 'Positive'
+                        bar.set_color('green')
+                    elif yval < -0.05:
+                        label = 'Negative'
+                        bar.set_color('red')
+                    else:
+                        label = 'Neutral'
+                        bar.set_color('blue')
+
+                    ax.text(bar.get_x() + bar.get_width() / 2, yval, label, ha='center', va='bottom', color='black')
+                ax.set_title("Average Sentiment Score by Weekday")
                 st.pyplot(fig)
 
             # month-wise-sentiment-map
@@ -197,7 +233,22 @@ if uploaded_file is not None:
                 st.header("Month Map")
                 sentiment_month_map = helper.get_sentiments_month_map(df)
                 fig, ax = plt.subplots()
-                ax.bar(sentiment_month_map['month_name'], sentiment_month_map['sentiment'])
+                bars = ax.bar(sentiment_month_map['month_name'], sentiment_month_map['sentiment'])
                 plt.xticks(rotation='vertical')
-                ax.set_ylabel("Sentiment")
+                ax.set_ylabel("Sentiment Score")
+
+                for bar in bars:
+                    yval = bar.get_height()
+                    if yval > 0.05:
+                        label = 'Positive'
+                        bar.set_color('green')
+                    elif yval < -0.05:
+                        label = 'Negative'
+                        bar.set_color('red')
+                    else:
+                        label = 'Neutral'
+                        bar.set_color('blue')
+
+                    ax.text(bar.get_x() + bar.get_width() / 2, yval, label, ha='center', va='bottom', color='black')
+                ax.set_title("Average Sentiment Score by Month")
                 st.pyplot(fig)
