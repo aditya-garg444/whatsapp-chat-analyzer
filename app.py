@@ -36,7 +36,6 @@ if uploaded_file is not None:
 
         if st.sidebar.button("Show Analysis"):
             df = helper.get_filtered_data(selected_users, df, start_date, end_date)
-            st.dataframe(df)
             # top-statistics
             num_messages, num_words, num_media_messages, num_links = helper.bring_stats(df)
             st.title("Top Statistics")
