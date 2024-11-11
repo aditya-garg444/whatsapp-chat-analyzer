@@ -177,8 +177,8 @@ def get_sentiments_weekly_map(df):
 
 
 def get_sentiments_month_map(df):
-    weekly_map = df.groupby(['year', 'month_number', 'month_name'])['sentiment'].mean().reset_index()
-    weekly_map.drop(columns=['year', 'month_number'])
+    weekly_map = df.groupby(['month_number', 'month_name'])['sentiment'].mean().reset_index()
+    weekly_map.drop(columns=['month_number'])
 
     return weekly_map
 
