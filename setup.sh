@@ -1,6 +1,6 @@
 # setup.sh
 # Skip rustup installation path check if Rust is already installed
-curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path
+curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 # Set the writable directories for Cargo and Rustup
 export CARGO_HOME=/tmp/cargo
