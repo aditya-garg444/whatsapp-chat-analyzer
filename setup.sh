@@ -24,3 +24,13 @@ rustup default stable
 # Confirm Rust installation and print version
 rustc --version
 cargo --version
+
+
+# Install Python dependencies including Streamlit
+pip install -r requirements.txt
+
+# Confirm Streamlit installation
+streamlit --version
+
+# Proceed with running the app
+streamlit run app.py
