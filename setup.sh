@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Skip the Rust installation if it's already present
+# Skip rustup installation if Rust is already present
 echo "Skipping rustup installation since Rust is already installed."
 
 # Set writable directories for Cargo and Rustup to avoid read-only file system errors
@@ -17,6 +17,9 @@ export PATH=$CARGO_HOME/bin:$PATH
 if [ -f "$HOME/.cargo/env" ]; then
   source $HOME/.cargo/env
 fi
+
+# Set default Rust toolchain to stable
+rustup default stable
 
 # Confirm Rust installation and print version
 rustc --version
