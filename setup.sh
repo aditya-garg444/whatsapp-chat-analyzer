@@ -1,5 +1,5 @@
 # setup.sh
-# Install Rust, bypassing checks
+# Skip rustup installation path check if Rust is already installed
 curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path
 
 # Set the writable directories for Cargo and Rustup
